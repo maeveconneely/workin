@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 
 import 'don\'t_touch/database_helper.dart';
 import 'don\'t_touch/listBlock.dart';
+import 'goHere.dart';
 import 'pusher_service.dart';
-
 
 void main() => runApp(MyApp());
 
@@ -17,7 +17,19 @@ class MyApp extends StatelessWidget {
     final title = 'Demo';
     return MaterialApp(
       title: title,
-      home: Home(),
+      home: Scaffold(
+      body: Stack(children: [
+        Positioned.fill(
+                  child: Container(
+            child: CustomPaint(
+              painter: CurvePainter(),
+              
+            ),
+          ),
+        ),
+        Positioned(child: Home()),
+      ]),
+    ),
     );
   }
 }
@@ -31,11 +43,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   final String CHANNEL = "my-channel";
   final String EVENT = "my-event";
   List tasks = [];
+  Task mainTask;
   var dbHelper = DatabaseHelper.instance;
 
   void navigation() {
     Navigator.push(context,
-        MaterialPageRoute(builder: (context) => LeaveSumCakeForTheRestOfUs()));
+        MaterialPageRoute(builder: (context) => GoHere(mainTask)));
   }
 
   Future<List> getAllRecords() async {
@@ -45,8 +58,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Future<List> getLists(List strings) async {
-   
-    
     List allRows = await getAllRecords();
     // print(allRows.length);
     // print(allRows);
@@ -55,17 +66,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       print(row);
       strings.add(Task.fromJson(row));
     });
-    
+
     print(strings);
-    
+
     List<Widget> list = new List<Widget>();
     for (var i = 0; i < strings.length; i++) {
       print(strings[i].name);
-      
+
       list.add(listBlock(strings[i].name, strings[i].finalDestination,
           strings[i].groceryStore, strings[i].groceries, navigation));
     }
-    
+
     print(list);
     return list;
   }
@@ -80,7 +91,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   PusherService pusherService = PusherService();
   @override
   void initState() {
-    
     pusherService = PusherService();
     pusherService.firePusher(CHANNEL, EVENT);
 
@@ -95,18 +105,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
+    return Center(
         child: ListView(children: [
-          Text("Tasks", style: TextStyle(fontWeight: FontWeight.bold),),
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text(
+              "Tasks",
+              style: TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.left,
+              textScaleFactor: 5,
+            ),
+          ),
           Column(
             children: <Widget>[
-              // FlatButton(
-              //   onPressed: (){
-              //     pusherService
-              //   },
-
-              // ),
               StreamBuilder(
                 stream: pusherService.eventStream,
                 builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -115,6 +126,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   }
                   Map taskMap = jsonDecode(snapshot.data);
                   Task t = Task.fromJson(taskMap);
+                  mainTask = t;
                   print(t);
 
                   addTask(t);
@@ -123,15 +135,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     child: FutureBuilder<List>(
                       future: getLists(tasks),
                       builder: (context, snapshot) {
-                      
-                      if (snapshot.hasData){
-                        print("okay");
-                        return Column(children: snapshot.data);
-                      }
-                      else {
-                        return CircularProgressIndicator();
-                      }
-                        
+                        if (snapshot.hasData) {
+                          print("okay");
+                          return Column(children: snapshot.data);
+                        } else {
+                          return CircularProgressIndicator();
+                        }
                       },
                     ),
                   );
@@ -140,7 +149,31 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ]),
-      ),
-    );
+      );
+    
+  }
+}
+
+class CurvePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint();
+    paint.color = Colors.lightBlue[800];
+    paint.style = PaintingStyle.fill; // Change this to fill
+
+    var path = Path();
+
+    path.moveTo(0, size.height * 0.25);
+    path.quadraticBezierTo(
+        size.width / 2, size.height / 2, size.width, size.height * 0.25);
+    path.lineTo(size.width, 0);
+    path.lineTo(0, 0);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }

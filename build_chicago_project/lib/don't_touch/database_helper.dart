@@ -10,10 +10,10 @@ import '../task.dart';
 
 class DatabaseHelper {
   
-  static final _databaseName = "MyDatabase4.db";
+  static final _databaseName = "MyDatabase5.db";
   static final _databaseVersion = 1;
 
-  static final table = 'tasks4';
+  static final table = 'tasks5';
   
  
   static final columnName = 'name';
