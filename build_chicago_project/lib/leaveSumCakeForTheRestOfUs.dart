@@ -19,15 +19,36 @@ class LeaveSumCakeForTheRestOfUs extends StatefulWidget {
 class _LeaveSumCakeForTheRestOfUsState
     extends State<LeaveSumCakeForTheRestOfUs> {
   Completer<GoogleMapController> _controller = Completer();
-
+  //location = 
   static const LatLng _center = const LatLng(41.8781, -87.6298);
 
   final Set<Marker> _markers = {};
 
   void _onMapCreated(GoogleMapController controller) {
     _controller.complete(controller);
+    for (int i = 0; i < locations.length; i++)
+    {
+      _addMarker(locations[i], context, _controller);
+    }
   }
 
+  void _addMarker(location,context,controller){
+    LatLng pos = LatLng(location.lat,location.long)
+    setState(()
+    _markers.add(Marker(
+      markerId: MarkerId(location.name)
+      position: pos,
+      icon: BitmapDescriptor.defaultMarker,
+      infoWindow: InfoWindow(
+        title: location.name
+        snippet: location.time,
+      ),
+      onTap: (){
+        _selectedLocation = location;
+      }
+    )
+    ))
+  }
   @override
   Widget build(BuildContext context) {
     String name = "";
@@ -36,7 +57,7 @@ class _LeaveSumCakeForTheRestOfUsState
     return Stack(
           children: [
             Container(
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(30),
               child: Text(
               "Location",
               style: TextStyle(fontWeight: FontWeight.bold),

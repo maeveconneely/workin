@@ -31,8 +31,8 @@ Completer<GoogleMapController> _controller = Completer();
         body: GoogleMap(
           onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(
-            target: _center,
-            zoom: 11.0,
+            target: center,
+            zoom: 15.0,
           ),
         ),
       ),
